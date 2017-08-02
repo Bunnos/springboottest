@@ -84,22 +84,33 @@ public class TransportServiceImpl implements TransportService {
             bokaEduresourceclassExample.clear();
             bokaEduresourceclassExample.createCriteria().andParentidEqualTo(one.getId());
             secondC = bokaEduresourceclassMapper.selectByExample(bokaEduresourceclassExample);
-            for (BokaEduresourceclass two : secondC) {
-                StringBuilder builderTwo = new StringBuilder(builderOne).append("-").append(PinYinUtils.convertLower(two.getName()));
-                jsCategoriesRelation.setLevel2(builderTwo.toString());
-                bokaEduresourceclassExample.clear();
-                bokaEduresourceclassExample.createCriteria().andParentidEqualTo(two.getId());
-                fourC = bokaEduresourceclassMapper.selectByExample(bokaEduresourceclassExample);
-                for (BokaEduresourceclass four : fourC) {
-                    StringBuilder builderThree = new StringBuilder(builderTwo).append("-beishidaban");
-                    jsCategoriesRelation.setLevel3(builderThree.toString());
-                    StringBuilder builderFour = new StringBuilder(builderThree).append("-").append(PinYinUtils.convertLower(four.getName()));
-                    jsCategoriesRelation.setLevel4(builderFour.toString());
+            if(one.getName().equals("二类教材")){
+                System.out.println("sss");
+            }
+            if (secondC != null && secondC.size() > 0) {
+                for (BokaEduresourceclass two : secondC) {
+                    StringBuilder builderTwo = new StringBuilder(builderOne).append("-").append(PinYinUtils.convertLower(two.getName()));
+                    jsCategoriesRelation.setLevel2(builderTwo.toString());
                     bokaEduresourceclassExample.clear();
-                    bokaEduresourceclassExample.createCriteria().andParentidEqualTo(four.getId());
-                    String code = NumberUtils.generateUniqueId(getCategoriesRelationId());
-                    jsCategoriesRelation.setCode(code);
-                    jsCategoriesRelationMapper.insert(jsCategoriesRelation);
+                    bokaEduresourceclassExample.createCriteria().andParentidEqualTo(two.getId());
+                    fourC = bokaEduresourceclassMapper.selectByExample(bokaEduresourceclassExample);
+                    if(fourC!=null && fourC.size()>0) {
+                        for (BokaEduresourceclass four : fourC) {
+                            StringBuilder builderThree = new StringBuilder(builderTwo).append("-beishidaban");
+                            jsCategoriesRelation.setLevel3(builderThree.toString());
+                            StringBuilder builderFour = new StringBuilder(builderThree).append("-").append(PinYinUtils.convertLower(four.getName()));
+                            jsCategoriesRelation.setLevel4(builderFour.toString());
+                            bokaEduresourceclassExample.clear();
+                            bokaEduresourceclassExample.createCriteria().andParentidEqualTo(four.getId());
+                            String code = NumberUtils.generateUniqueId(getCategoriesRelationId());
+                            jsCategoriesRelation.setCode(code);
+                            jsCategoriesRelationMapper.insert(jsCategoriesRelation);
+                        }
+                    }else {
+                            String code = NumberUtils.generateUniqueId(getCategoriesRelationId());
+                            jsCategoriesRelation.setCode(code);
+                            jsCategoriesRelationMapper.insert(jsCategoriesRelation);
+                    }
                 }
             }
         }
@@ -218,11 +229,11 @@ public class TransportServiceImpl implements TransportService {
             int i = 0;
             for (JsCategoriesRelation entity : jsCategoriesRelations) {
                 String s = NumberUtils.transToThreePositionNum(i);
-                entity.setLevel1sort("A"+s);
-                entity.setLevel2sort("B"+s);
-                entity.setLevel3sort("C"+s);
-                entity.setLevel4sort("D"+s);
-                i = i+1;
+                entity.setLevel1sort("A" + s);
+                entity.setLevel2sort("B" + s);
+                entity.setLevel3sort("C" + s);
+                entity.setLevel4sort("D" + s);
+                i = i + 1;
                 jsCategoriesRelationMapper.updateByPrimaryKeySelective(entity);
             }
         }

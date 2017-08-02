@@ -20,4 +20,5 @@ public interface CommonConst {
     String JPG = ".jpg";
     String PNG = ".png";
     String PDF = ".pdf";
+    String newCate = "youeryuankechengziyuan,youeryuankechengziyuan-youeryuankuaileyufazhankecheng,youeryuankechengziyuan-youeryuankuaileyufazhankecheng-beishidaban";
 }

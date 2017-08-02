@@ -8,4 +8,6 @@ public interface ResourceService {
     String transferSynByResourceClassType(int type);
 
     void setResourceCode();
+
+    void changeCate();
 }

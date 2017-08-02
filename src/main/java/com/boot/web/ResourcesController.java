@@ -49,4 +49,15 @@ public class ResourcesController {
         }
         return "success";
     }
+
+    @RequestMapping("/changeCate")
+    public String changeCate() {
+        try {
+            resourceService.changeCate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+        return "success";
+    }
 }

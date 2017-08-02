@@ -4,8 +4,8 @@
     <classPathEntry
             location="D:\mavenRepository\mysql\mysql-connector-java\5.1.42\mysql-connector-java-5.1.42.jar" />
     <context id="context1" targetRuntime="MyBatis3">
-       <!-- <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://10.4.67.195:3306/db_basicedu_test_new?characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;tinyInt1isBit=false"
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://10.4.67.195:3336/db_basicedu_test?characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;tinyInt1isBit=false"
                         userId="root" password="iflytek123" />
         <javaModelGenerator targetPackage="com.boot.model.cluster"
                             targetProject="D:\jsxfWorkSpace\springboottest\src\main\java" />
@@ -13,17 +13,18 @@
                          targetProject="D:\jsxfWorkSpace\springboottest\src\main\resources\mybatis\mapper\" />
         <javaClientGenerator targetPackage="com.boot.dao.cluster"
             targetProject="D:\jsxfWorkSpace\springboottest\src\main\java" type="XMLMAPPER" />
-        &lt;!&ndash;<table schema="CL_DEMO" tableName="js_categories" />
-        <table schema="CL_DEMO" tableName="js_categories_dict" />&ndash;&gt;
-        &lt;!&ndash;<table schema="CL_DEMO" tableName="js_resource_statistics" />&ndash;&gt;
-        &lt;!&ndash;<table schema="CL_DEMO" tableName="js_categories_relation" />&ndash;&gt;
-        &lt;!&ndash;<table schema="CL_DEMO" tableName="js_resource" />&ndash;&gt;
-        &lt;!&ndash;<table schema="CL_DEMO" tableName="js_resource_mid_categories" />&ndash;&gt;
-        <table schema="CL_DEMO" tableName="temp" />
--->
+        <!--<table schema="CL_DEMO" tableName="js_categories" />
+        <table schema="CL_DEMO" tableName="js_categories_dict" />-->
+        <!--<table schema="CL_DEMO" tableName="js_resource_statistics" />-->
+        <!--<table schema="CL_DEMO" tableName="js_categories_relation" />-->
+        <!--<table schema="CL_DEMO" tableName="js_resource" />-->
+        <!--<table schema="CL_DEMO" tableName="js_resource_mid_categories" />-->
+        <!--<table schema="CL_DEMO" tableName="js_categories_copy" />-->
+        <table schema="CL_DEMO" tableName="js_ebook_template" />
+        <table schema="CL_DEMO" tableName="js_ebook" />
 
 
-        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+        <!--<jdbcConnection driverClass="com.mysql.jdbc.Driver"
                         connectionURL="jdbc:mysql://10.4.67.195:3306/db_basicedu_oldata?characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;tinyInt1isBit=false"
                         userId="root" password="iflytek123" />
         <javaModelGenerator targetPackage="com.boot.model.master"
@@ -32,9 +33,9 @@
                          targetProject="D:\jsxfWorkSpace\springboottest\src\main\resources\mybatis\mapper\" />
         <javaClientGenerator targetPackage="com.boot.dao.master"
                              targetProject="D:\jsxfWorkSpace\springboottest\src\main\java" type="XMLMAPPER" />
-        <!--<table schema="CL_DEMO" tableName="boka_members" />-->
-        <!--<table schema="CL_DEMO" tableName="boka_eduresource" />-->
-        <!--<table schema="CL_DEMO" tableName="boka_newsclass" />-->
-        <table schema="CL_DEMO" tableName="boka_newscontent" />
+        &lt;!&ndash;<table schema="CL_DEMO" tableName="boka_members" />&ndash;&gt;
+        &lt;!&ndash;<table schema="CL_DEMO" tableName="boka_eduresource" />&ndash;&gt;
+        &lt;!&ndash;<table schema="CL_DEMO" tableName="boka_newsclass" />&ndash;&gt;
+        &lt;!&ndash;<table schema="CL_DEMO" tableName="boka_newscontent" />&ndash;&gt;-->
     </context>
 </generatorConfiguration>
