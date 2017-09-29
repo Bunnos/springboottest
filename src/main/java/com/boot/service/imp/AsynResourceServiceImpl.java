@@ -8,6 +8,7 @@ import com.boot.dao.cluster.*;
 import com.boot.dao.master.BokaNewsMapper;
 import com.boot.dao.master.BokaNewsclassMapper;
 import com.boot.dao.master.BokaNewscontentMapper;
+import com.boot.dao.master.TempTableMapper;
 import com.boot.model.cluster.*;
 import com.boot.model.cluster.bo.ResourceTypeTwoLvBo;
 import com.boot.model.master.*;
@@ -34,6 +35,8 @@ public class AsynResourceServiceImpl implements AsynResourceService {
     private BokaNewsMapper newsMapper;
     @Autowired
     private BokaNewscontentMapper newscontentMapper;
+    @Autowired
+    private TempTableMapper tempMapper;
     /*
     从库
      */
@@ -74,7 +77,7 @@ public class AsynResourceServiceImpl implements AsynResourceService {
                         putPhaseSubject(jsResource, phaseId, phase, subjectId, subject, categoriesCode);
                         putLevelResourceType(jsResource, rName);
                         putFileResourceType(entity, jsResource);
-                        putContent(entity,jsResource);
+                        putContent(entity, jsResource);
                         resourceMapper.insert(jsResource);
                     }
                 }
@@ -84,11 +87,34 @@ public class AsynResourceServiceImpl implements AsynResourceService {
         return "success";
     }
 
+    @Override
+    public void setContent() throws Exception {
+        JsResourceExample jsResourceExample = new JsResourceExample();
+        jsResourceExample.createCriteria().andFilepathIsNotNull().andContentIsNull().andSwfpathIsNull().andResourceformatvalueEqualTo("其他")
+                .andResourcetypeNotEqualTo("SYN");
+        List<JsResourceWithBLOBs> jsResourceWithBLOBs = resourceMapper.selectByExampleWithBLOBs(jsResourceExample);
+        if (jsResourceWithBLOBs != null && jsResourceWithBLOBs.size() > 0) {
+            for (JsResourceWithBLOBs entity : jsResourceWithBLOBs) {
+                String title = entity.getTitle();
+                Date createdate = entity.getCreatedate();
+                Long date = createdate.getTime() / 1000;
+                TempTableExample tempExample = new TempTableExample();
+                tempExample.createCriteria().andTitleEqualTo(title).andDatelineEqualTo(date);
+                List<TempTable> temps = tempMapper.selectByExampleWithBLOBs(tempExample);
+                if (temps != null && temps.size() > 0) {
+                    entity.setContent(temps.get(0).getContent());
+                }
+                resourceMapper.updateByPrimaryKeySelective(entity);
+            }
+        }
+    }
+
+
     private void putContent(BokaNews entity, JsResourceWithBLOBs jsResource) {
         BokaNewscontentWithBLOBs bokaNewscontentWithBLOBs = newscontentMapper.selectByPrimaryKey(entity.getId());
         String content = "";
         String content_old = bokaNewscontentWithBLOBs.getContent();
-        if(bokaNewscontentWithBLOBs!=null && !StringUtils.isEmpty(content_old)){
+        if (bokaNewscontentWithBLOBs != null && !StringUtils.isEmpty(content_old)) {
             content = content_old;
         }
         jsResource.setContent(content);
@@ -104,15 +130,15 @@ public class AsynResourceServiceImpl implements AsynResourceService {
             putPdfOrSwfPath(jsResource, news12);
         }
         if (!StringUtils.isEmpty(news14)) {
-            String path14 = UnserializePhpCodeUtils.unSerializePhpCode(entity,news14);
+            String path14 = UnserializePhpCodeUtils.unSerializePhpCode(entity, news14);
             putPdfOrSwfPath(jsResource, path14);
         }
         if (!StringUtils.isEmpty(news16)) {
-            String path16 = UnserializePhpCodeUtils.unSerializePhpCode(entity,news16);
+            String path16 = UnserializePhpCodeUtils.unSerializePhpCode(entity, news16);
             putPdfOrSwfPath(jsResource, path16);
         }
         if (!StringUtils.isEmpty(news17)) {
-            String path17 = UnserializePhpCodeUtils.unSerializePhpCode(entity,news17);
+            String path17 = UnserializePhpCodeUtils.unSerializePhpCode(entity, news17);
             putPdfOrSwfPath(jsResource, path17);
         }
 
@@ -256,9 +282,9 @@ public class AsynResourceServiceImpl implements AsynResourceService {
                 sbTwo = new StringBuilder(sbOne).append("-").append(subjectId);
                 categoriesCode.append(sbTwo).append(",");
                 sbThree = new StringBuilder(sbTwo).append("-").append(CommonConst.BEISHIDABAN);
-                if(size==2){
+                if (size == 2) {
                     categoriesCode.append(sbThree);
-                }else {
+                } else {
                     categoriesCode.append(sbThree).append(",");
                 }
             }

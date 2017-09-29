@@ -42,7 +42,7 @@ public class FileConvertServiceImpl implements FileConvertService {
         int i = 0;
         if (list != null && list.size() > 0) {
             for (JsResourceWithBLOBs entity : list) {
-                if (i == 150) {
+                if (i == 15) {
                     break;
                 }
                 String filePath = entity.getFilepath();

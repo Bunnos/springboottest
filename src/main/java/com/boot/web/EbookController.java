@@ -15,10 +15,10 @@ public class EbookController {
     private EbookService ebookService;
 
     @RequestMapping("/tran")
-    public String transferSyncResByClassType() {
+    public String transferSyncResByClassType(int type) {
         String response;
         try {
-            response = ebookService.transferData();
+            response = ebookService.transferData(type);
         } catch (Exception e) {
             response = e.getMessage();
         }

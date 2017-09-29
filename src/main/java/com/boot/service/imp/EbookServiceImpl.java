@@ -1,11 +1,7 @@
 package com.boot.service.imp;
 
-import com.boot.dao.cluster.JsEbookMapper;
-import com.boot.dao.cluster.TempMapper;
-import com.boot.model.cluster.JsEbook;
-import com.boot.model.cluster.JsEbookExample;
-import com.boot.model.cluster.Temp;
-import com.boot.model.cluster.TempExample;
+import com.boot.dao.cluster.*;
+import com.boot.model.cluster.*;
 import com.boot.service.EbookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,26 +18,50 @@ public class EbookServiceImpl implements EbookService{
     @Autowired
     public JsEbookMapper ebookMapper;
     @Autowired
+    public JsEbookNewMapper ebookNewMapper;
+    @Autowired
     public TempMapper tempMapper;
+    @Autowired
+    public TempEbookMapper tempEbookMapper;
+    @Autowired
+    public TempTeacherMapper tempTeacherMapper;
 
     @Override
-    public String transferData() {
-        TempExample tempExample = new TempExample();
-        tempExample.createCriteria().andCategoriescodeIsNotNull();
-        List<Temp> temps = tempMapper.selectByExample(tempExample);
-        JsEbookExample ebookExample;
-        if(temps!=null && temps.size()>0){
-            for (Temp temp:temps){
-                ebookExample = new JsEbookExample();
-                ebookExample.createCriteria().andCategoriescodeLike(temp.getCategoriescode()+"%");
-                List<JsEbook> jsEbooks = ebookMapper.selectByExample(ebookExample);
-                Long count = temp.getCount();
-                for (JsEbook ebook:jsEbooks){
-                    ebook.setTotalnum(count);
-                    ebookMapper.updateByPrimaryKeySelective(ebook);
+    public String transferData(int type) {
+        if(type==0){
+            TempEbookExample bookExample = new TempEbookExample();
+            bookExample.createCriteria().andCategoriescodeIsNotNull().andRtypeEqualTo(0);
+            List<TempEbook> tempEbooks = tempEbookMapper.selectByExample(bookExample);
+            if(tempEbooks!=null && tempEbooks.size()>0){
+                for (TempEbook temp:tempEbooks){
+                    String code = temp.getCategoriescode();
+                    long count = temp.getCount();
+                    updateEbook(code,count,type);
+                }
+            }
+        }
+        if(type==1){
+            TempTeacherExample teacherExample = new TempTeacherExample();
+            teacherExample.createCriteria().andCategoriescodeIsNotNull().andRtypeEqualTo(1);
+            List<TempTeacher> tempTeachers = tempTeacherMapper.selectByExample(teacherExample);
+            if(tempTeachers!=null && tempTeachers.size()>0){
+                for (TempTeacher temp:tempTeachers){
+                    String code = temp.getCategoriescode();
+                    long count = temp.getCount();
+                    updateEbook(code,count,type);
                 }
             }
         }
         return "success";
+    }
+
+    private void updateEbook(String cateCode,long count,int type){
+        JsEbookNewExample ebookExample = new JsEbookNewExample();
+        ebookExample.createCriteria().andCategoriescodeLike(cateCode+"%").andRtypeEqualTo(type);
+        List<JsEbookNew> jsEbooks = ebookNewMapper.selectByExample(ebookExample);
+        for (JsEbookNew ebook:jsEbooks){
+            ebook.setTotalnum(count);
+            ebookNewMapper.updateByPrimaryKeySelective(ebook);
+        }
     }
 }

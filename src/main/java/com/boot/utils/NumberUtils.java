@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2017/7/5.
@@ -78,5 +80,35 @@ public class NumberUtils {
         DecimalFormat mFormat = new DecimalFormat("000");//确定格式，把1转换为001
         String s = mFormat.format(i);
         return s;
+    }
+
+    public static Map<String, String> transferEbookPhotoPathWithMonth(String code) {
+        Map<String, String> map = new HashMap();
+        String substring = code.substring(0, code.indexOf("."));
+        String pre1 = substring.substring(0, substring.lastIndexOf("_"));
+        boolean flag = false;
+        if (pre1.indexOf("-") > -1) {
+            String new1 = pre1.substring(pre1.length() - 3);
+            Pattern pattern = Pattern.compile("[0-9]*");
+            Matcher isNum = pattern.matcher(new1);
+            if (isNum.matches()) {
+                flag = true;
+            }
+
+            String pre2 = substring.substring(substring.lastIndexOf("_"));
+            if (flag) {
+                String number = pre1.substring(pre1.length() - 3);
+                String preffix = new StringBuilder(pre1.substring(0,pre1.length() - 3)).append(pre2).toString();
+                map.put("num", number);
+                map.put("preffix", preffix);
+            }
+        }
+        return map;
+    }
+
+    public static void main(String[] args) {
+        String code = "month_201010/gzsxxx4-6044_9M5g6d.jpg";
+        NumberUtils.transferEbookPhotoPathWithMonth(code);
+
     }
 }

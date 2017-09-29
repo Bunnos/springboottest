@@ -684,7 +684,7 @@ public class JsEbookExample {
             return (Criteria) this;
         }
 
-        public Criteria andRtypeEqualTo(Byte value) {
+        public Criteria andRtypeEqualTo(Integer value) {
             addCriterion("rtype =", value, "rtype");
             return (Criteria) this;
         }

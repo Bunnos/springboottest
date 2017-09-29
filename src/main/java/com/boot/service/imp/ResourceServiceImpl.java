@@ -54,11 +54,15 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     private JsCategoriesDictMapper categoriesDictMapper;
     @Autowired
+    private JsCategoriesDictCopyMapper categoriesDictCopyMapper;
+    @Autowired
     private JsCategoriesMapper categoriesMapper;
     @Autowired
     private JsCategoriesRelationMapper relationMapper;
     @Autowired
     private JsEbookMapper ebookMapper;
+    @Autowired
+    private JsEbookNewMapper ebookNewMapper;
     @Autowired
     private JsCategoriesCopyMapper copyMapper;
     @Autowired
@@ -68,6 +72,12 @@ public class ResourceServiceImpl implements ResourceService {
     public String transferSynByResourceClassType(int classType) {
         List<BokaEduresourceWithBLOBs> sourceList = getSourceListByType(classType);
         JsResourceWithBLOBs jsResource;
+        int rtype = 0;
+        if (classType == 1) {
+            rtype = 0;
+        } else if (classType == 3) {
+            rtype = 1;
+        }
         try {
             if (sourceList != null && sourceList.size() > 0) {
 //                int i = 0;
@@ -82,7 +92,7 @@ public class ResourceServiceImpl implements ResourceService {
                             (classType == 3 && !StringUtils.isEmpty(entity.getTitle()) && entity.getTitle().indexOf("cover") > -1)
                             || (classType == 1 && !StringUtils.isEmpty(entity.getTitle()) && entity.getTitle().indexOf("coverpage") > -1)) {
                         // 设置基本信息
-                        putBasicInfo(entity, jsResource);
+                       /* putBasicInfo(entity, jsResource);
                         // 设置一级资源类目
                         putOneLevelResourceType(jsResource);
                         // 设置资源格式
@@ -92,8 +102,8 @@ public class ResourceServiceImpl implements ResourceService {
                         // 设置资源目录
                         putResourcePath(entity, jsResource);
                         // 设置学段学科
-                        putPhaseSubjectInfo(entity, jsResource);
-//                        System.out.println("");
+                        String four = putPhaseSubjectInfo(entity, jsResource);
+                        putResourceContributeId(four,jsResource,rtype);
                         stringBuilder = new StringBuilder("ZY");
                         Date date1 = new Date();
                         SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -102,22 +112,28 @@ public class ResourceServiceImpl implements ResourceService {
                         String num = String.format("%05d", i);
                         stringBuilder.append(num);
                         jsResource.setResourcecode(stringBuilder.toString());
-
-                        resourceMapper.insert(jsResource);
+                        resourceMapper.insert(jsResource);*/
                     } else {
                         // E-BOOK
-                        JsEbook ebook = null;
+                        JsEbookNew ebook = null;
                         String four = putPhaseSubjectInfo(entity, jsResource);
                         String categoriesCode = jsResource.getCategoriescode();
                         String phtoto = entity.getPhoto();
+                        String title = entity.getTitle();
                         List<String> list = UnserializePhpCodeUtils.unEbookSerializePhpCode(phtoto);
                         if (list != null && list.size() > 0) {
                             for (String photoPath : list) {
                                 if (!StringUtils.isEmpty(photoPath) && !photoPath.startsWith("month")) {
-                                    Map<String, String> map = NumberUtils.transferEbookPhotoPath(photoPath);
-                                    ebook = new JsEbook();
+                                    Map<String, String> map = null;
+//                                    if(!photoPath.startsWith("month")) {
+                                    map = NumberUtils.transferEbookPhotoPath(photoPath);
+//                                    }else {
+//                                        map = NumberUtils.transferEbookPhotoPathWithMonth(photoPath);
+//                                    }
+
+                                    ebook = new JsEbookNew();
                                     if (!StringUtils.isEmpty(four)) {
-                                        putEbookTemplate(four, ebook);
+                                        putEbookTemplate(four, ebook, rtype);
                                     }
                                     if (map != null && map.size() > 0) {
                                         String num = map.get("num");
@@ -131,6 +147,7 @@ public class ResourceServiceImpl implements ResourceService {
                                         ebook.setCategoriescode(categoriesCode);
                                         ebook.setId(UUID.randomUUID().toString());
                                         ebook.setOrigin(CommonConst.OLD);
+                                        ebook.setTitle(title);
                                         if (classType == 1) {
                                             ebook.setRtype(0);
                                         }
@@ -138,8 +155,7 @@ public class ResourceServiceImpl implements ResourceService {
                                             ebook.setRtype(1);
                                         }
                                     }
-                                    System.out.println("");
-                                    ebookMapper.insert(ebook);
+//                                    ebookNewMapper.insert(ebook);
                                 }
                             }
                         }
@@ -153,7 +169,8 @@ public class ResourceServiceImpl implements ResourceService {
         return "success";
     }
 
-    private void putEbookTemplate(String four, JsEbook ebook) {
+    private void putEbookTemplate(String four, JsEbookNew ebook, int rtype) {
+
         if (!StringUtils.isEmpty(four)) {
             JsCategoriesRelationExample example = new JsCategoriesRelationExample();
             example.createCriteria().andLevel4EqualTo(four);
@@ -162,11 +179,31 @@ public class ResourceServiceImpl implements ResourceService {
                 JsCategoriesRelation jsCategoriesRelation = jsCategoriesRelations.get(0);
                 Integer id = jsCategoriesRelation.getId();
                 JsEbookTemplateExample templateExample = new JsEbookTemplateExample();
-                templateExample.createCriteria().andRelationidEqualTo(String.valueOf(id));
+                templateExample.createCriteria().andRelationidEqualTo(String.valueOf(id)).andRtypeEqualTo(rtype);
                 List<JsEbookTemplate> jsEbookTemplates = templateMapper.selectByExample(templateExample);
                 if (jsEbookTemplates != null && jsEbookTemplates.size() > 0) {
                     JsEbookTemplate jsEbookTemplate = jsEbookTemplates.get(0);
                     ebook.setTemplateid(jsEbookTemplate.getId());
+                }
+            }
+        }
+    }
+
+    private void putResourceContributeId(String four, JsResource resource, int rtype) {
+
+        if (!StringUtils.isEmpty(four)) {
+            JsCategoriesRelationExample example = new JsCategoriesRelationExample();
+            example.createCriteria().andLevel4EqualTo(four);
+            List<JsCategoriesRelation> jsCategoriesRelations = relationMapper.selectByExample(example);
+            if (jsCategoriesRelations != null && jsCategoriesRelations.size() > 0) {
+                JsCategoriesRelation jsCategoriesRelation = jsCategoriesRelations.get(0);
+                Integer id = jsCategoriesRelation.getId();
+                JsEbookTemplateExample templateExample = new JsEbookTemplateExample();
+                templateExample.createCriteria().andRelationidEqualTo(String.valueOf(id)).andRtypeEqualTo(rtype);
+                List<JsEbookTemplate> jsEbookTemplates = templateMapper.selectByExample(templateExample);
+                if (jsEbookTemplates != null && jsEbookTemplates.size() > 0) {
+                    JsEbookTemplate jsEbookTemplate = jsEbookTemplates.get(0);
+                    resource.setContributeid(jsEbookTemplate.getId());
                 }
             }
         }
@@ -239,7 +276,6 @@ public class ResourceServiceImpl implements ResourceService {
                     i = i + 1;
 
                 }
-                System.out.println("newcate:" + newcate.toString());
                 entity.setCategoriescode(newcate.toString());
                 resourceCopyMapper.updateByPrimaryKeySelective(entity);
             }
@@ -307,6 +343,7 @@ public class ResourceServiceImpl implements ResourceService {
     private String putPhaseSubjectInfo(BokaEduresourceWithBLOBs entity, JsResource jsResource) throws Exception {
         String classId = entity.getClassid();
         StringBuilder sbFour = null;
+        String parentId = null;
         if (!StringUtils.isEmpty(classId)) {
             List<String> sortList = new ArrayList();
             BokaEduresourceclassExample example = new BokaEduresourceclassExample();
@@ -327,6 +364,7 @@ public class ResourceServiceImpl implements ResourceService {
             StringBuilder sbTwo = null;
             StringBuilder sbThree = null;
             int size = sortList.size();
+//            if(size>6) {
             for (String param : sortList) {
                 if (count == 1) { // 学段
                     phaseId = PinYinUtils.convertLower(param);
@@ -348,7 +386,6 @@ public class ResourceServiceImpl implements ResourceService {
                         sbTwo = new StringBuilder(sbOne).append("-").append(subjectId);
                         categoriesCode.append(sbTwo).append(",");
                         sbThree = new StringBuilder(sbTwo).append("-").append(CommonConst.BEISHIDABAN);
-                        // todo 待测试
                         if (size == 2) {
                             categoriesCode.append(sbThree);
                         } else {
@@ -359,7 +396,6 @@ public class ResourceServiceImpl implements ResourceService {
                 if (count == 3) {
                     sbFour = new StringBuilder(sbThree)
                             .append("-").append(PinYinUtils.convertLower(param));
-                    System.out.println(sbFour);
                     if (size > 3) {
                         categoriesCode.append(sbFour).append(",");
                     } else {
@@ -369,20 +405,82 @@ public class ResourceServiceImpl implements ResourceService {
 
                 if (size > 3 && count > 3) {
                     JsCategoriesExample dictExample = new JsCategoriesExample();
-                    dictExample.createCriteria().andNameEqualTo(param).andLevel4CodeEqualTo(sbFour.toString());
-                    List<JsCategories> jsCategoriesList = categoriesMapper.selectByExample(dictExample);
-                    if (jsCategoriesList != null && jsCategoriesList.size() > 0) {
-                        JsCategories jsCategories = jsCategoriesList.get(0);
-                        String id = jsCategories.getId();
-                        if (count == size) {
-                            categoriesCode.append(id);
+                    if (count == 4) {
+                        if (!StringUtils.isEmpty(sbFour)) {
+                            dictExample.createCriteria().andNameEqualTo(param).andLevel4CodeEqualTo(sbFour.toString());
                         } else {
-                            categoriesCode.append(id).append(",");
+                            dictExample.createCriteria().andNameEqualTo(param);
+                        }
+                        List<JsCategories> jsCategoriesList = categoriesMapper.selectByExample(dictExample);
+                        if (jsCategoriesList != null && jsCategoriesList.size() > 0) {
+                            if (jsCategoriesList.size() == 1) {
+                                JsCategories jsCategories = jsCategoriesList.get(0);
+                                String id = jsCategories.getId();
+                                if (count == size) {
+                                    categoriesCode.append(id);
+                                } else {
+                                    categoriesCode.append(id).append(",");
+                                }
+                                parentId = jsCategories.getId();
+                                if (!StringUtils.isEmpty(parentId)) {
+                                    dictExample.createCriteria().andNameEqualTo(param).andLevel4CodeEqualTo(sbFour.toString()).andParentidEqualTo(parentId);
+                                    List<JsCategories> jsCategoriesList1 = categoriesMapper.selectByExample(dictExample);
+                                    if (jsCategoriesList1 != null && jsCategoriesList1.size() > 0) {
+                                        JsCategories jsCategories1 = jsCategoriesList1.get(0);
+                                        String id1 = jsCategories1.getId();
+                                        if (count == size) {
+                                            categoriesCode.append(id1);
+                                        } else {
+                                            categoriesCode.append(id1).append(",");
+                                        }
+                                        parentId = jsCategories1.getId();
+                                    } else {
+                                        System.out.println(categoriesCode);
+                                    }
+                                }
+                            } else {
+                                for (JsCategories categories : jsCategoriesList) {
+                                    parentId = categories.getId();
+                                    if (count > 4 && !StringUtils.isEmpty(parentId)) {
+                                        dictExample.createCriteria().andNameEqualTo(param).andLevel4CodeEqualTo(sbFour.toString()).andParentidEqualTo(parentId);
+                                        List<JsCategories> jsCategoriesList1 = categoriesMapper.selectByExample(dictExample);
+                                        if (jsCategoriesList1 != null && jsCategoriesList1.size() > 0) {
+                                            JsCategories jsCategories1 = jsCategoriesList1.get(0);
+                                            String id1 = jsCategories1.getId();
+                                            if (count == size) {
+                                                categoriesCode.append(id1);
+                                            } else {
+                                                categoriesCode.append(id1).append(",");
+                                            }
+                                            parentId = jsCategories1.getId();
+                                        } else {
+                                            System.out.println(categoriesCode);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                      /*  if (count > 4 && !StringUtils.isEmpty(parentId)) {
+                            dictExample.createCriteria().andNameEqualTo(param).andLevel4CodeEqualTo(sbFour.toString()).andParentidEqualTo(parentId);
+                            List<JsCategories> jsCategoriesList = categoriesMapper.selectByExample(dictExample);
+                            if (jsCategoriesList != null && jsCategoriesList.size() > 0) {
+                                JsCategories jsCategories = jsCategoriesList.get(0);
+                                String id = jsCategories.getId();
+                                if (count == size) {
+                                    categoriesCode.append(id);
+                                } else {
+                                    categoriesCode.append(id).append(",");
+                                }
+                                parentId = jsCategories.getId();
+                            }else {
+                                System.out.println(categoriesCode);
+                            }
+                        }*/
                 }
                 count = count + 1;
             }
+//            }
             jsResource.setCategoriescode(categoriesCode.toString());
         }
         if (!StringUtils.isEmpty(sbFour)) {
@@ -405,14 +503,18 @@ public class ResourceServiceImpl implements ResourceService {
                 List<JsCategories> jsCategoriesList = categoriesMapper.selectByExample(jsCategoriesExample);
                 if (jsCategoriesList != null && jsCategoriesList.size() > 0) {
                     JsCategories jsCategories = jsCategoriesList.get(0);
-                    sortList.add(jsCategories.getName());
+                    String name = jsCategories.getName();
+                    sortList.add(name);
                 } else {
                     JsCategoriesDictExample dictExample = new JsCategoriesDictExample();
-                    dictExample.createCriteria().andNameEqualTo(bo.getName());
+                    String lower = PinYinUtils.convertLower(bo.getName());
+                    dictExample.createCriteria().andCodeEqualTo(lower);
                     List<JsCategoriesDict> categoriesDictList = categoriesDictMapper.selectByExample(dictExample);
                     if (categoriesDictList != null && categoriesDictList.size() > 0) {
                         JsCategoriesDict jsCategoriesDict = categoriesDictList.get(0);
-                        sortList.add(jsCategoriesDict.getName());
+//                        String name = jsCategoriesDict.getName();
+                        String name = jsCategoriesDict.getCode();
+                        sortList.add(name);
                     }
                 }
                 dieDaiTest(bo.getParentid(), sortList);
@@ -524,7 +626,7 @@ public class ResourceServiceImpl implements ResourceService {
      */
     private List<BokaEduresourceWithBLOBs> getSourceListByType(int classType) {
         BokaEduresourceExample example = new BokaEduresourceExample();
-        example.createCriteria().andResourcetypeEqualTo((byte) classType);
+        example.createCriteria().andResourcetypeEqualTo((byte) classType).andModerateEqualTo(1);
         List<BokaEduresourceWithBLOBs> bokaEduresourceWithBLOBs = eduresourceMapper.selectByExampleWithBLOBs(example);
         return bokaEduresourceWithBLOBs;
     }

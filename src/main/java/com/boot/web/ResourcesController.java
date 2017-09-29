@@ -60,4 +60,15 @@ public class ResourcesController {
         }
         return "success";
     }
+
+    @RequestMapping("/setContent")
+    public String setContent(){
+        try {
+            asynResourceService.setContent();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+        return "success";
+    }
 }

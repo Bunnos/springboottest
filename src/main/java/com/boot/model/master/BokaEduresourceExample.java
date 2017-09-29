@@ -204,6 +204,11 @@ public class BokaEduresourceExample {
             return (Criteria) this;
         }
 
+        public Criteria andPhotoIsNotNull(){
+            addCriterion("photo is not null");
+            return (Criteria) this;
+        }
+
         public Criteria andIdEqualTo(Integer value) {
             addCriterion("id =", value, "id");
             return (Criteria) this;
@@ -944,7 +949,7 @@ public class BokaEduresourceExample {
             return (Criteria) this;
         }
 
-        public Criteria andModerateEqualTo(Byte value) {
+        public Criteria andModerateEqualTo(Integer value) {
             addCriterion("moderate =", value, "moderate");
             return (Criteria) this;
         }
@@ -1384,7 +1389,7 @@ public class BokaEduresourceExample {
             return (Criteria) this;
         }
 
-        public Criteria andDatelineEqualTo(Integer value) {
+        public Criteria andDatelineEqualTo(Long value) {
             addCriterion("dateline =", value, "dateline");
             return (Criteria) this;
         }
